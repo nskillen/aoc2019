@@ -20,6 +20,11 @@ class VM:
         self.sp = 0
         self.debug = False
         self.print_asm = False
+        self.queue_inputs = False
+        self.queued_inputs = list()
+        self.waiting_for_input = False
+        self.queue_outputs = False
+        self.queued_outputs = list()
     
     def load(self, instructions: str):
         instrlist = list(map(int, instructions.split(",")))
@@ -32,8 +37,10 @@ class VM:
             address += 1
 
     def run(self):
-        while not self.halted:
+        while not self.halted and not self.waiting_for_input:
             self.step()
+        if self.waiting_for_input:
+            self.waiting_for_input = False
     
     def step(self):
         instruction = self.memory.read(self.ip)
@@ -64,6 +71,10 @@ class VM:
                 op['fn'](self, *pvtuples)
             except:
                 traceback.print_exc()
+
+        if self.waiting_for_input:
+            self.ip -= ilen
+
     
     def jump(self, location: Union[int, Tuple[int, int]]):
         if isinstance(location, tuple):
@@ -106,3 +117,17 @@ class VM:
         else:
             print("Unknown pmode: %d" % pmode)
             exit(1)
+
+    def queue_input(self, input):
+        if isinstance(input, list):
+            self.queued_inputs.extend(input)
+        else:
+            self.queued_inputs.append(input)
+
+    def get_output(self):
+        if len(self.queued_outputs) > 0:
+            output = self.queued_outputs[0]
+            self.queued_outputs = self.queued_outputs[1:]
+            return output
+        else:
+            return None
