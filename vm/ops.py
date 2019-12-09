@@ -5,14 +5,14 @@ def add(vm, a1: Tuple[int, int], a2: Tuple[int, int], a3: Tuple[int, int]):
     v2 = vm.get(*a2)
     if vm.debug:
         print("[{}] = {} + {}".format(a3, v1, v2))
-    vm.memory.write(a3, v1 + v2)
+    vm.put(a3, v1 + v2)
 
 def mul(vm, a1: Tuple[int, int], a2: Tuple[int, int], a3: Tuple[int, int]):
     v1 = vm.get(*a1)
     v2 = vm.get(*a2)
     if vm.debug:
         print("[{}] = {} * {}".format(a3, v1, v2))
-    vm.memory.write(a3, v1 * v2)
+    vm.put(a3, v1 * v2)
 
 def inp(vm, a1: Tuple[int, int]):
     if not vm.queue_inputs:
@@ -26,7 +26,7 @@ def inp(vm, a1: Tuple[int, int]):
 
     if vm.debug:
         print("[{}] = {}".format(a1, val))
-    vm.memory.write(a1, val)
+    vm.put(a1, val)
 
 def out(vm, a1: Tuple[int, int]):
     v1 = vm.get(a1)
@@ -50,14 +50,18 @@ def lt(vm, a1: Tuple[int, int], a2: Tuple[int, int], a3: Tuple[int, int]):
     v2 = vm.get(*a2)
     if vm.debug:
         print("{} < {} ?".format(v1,v2))
-    vm.memory.write(a3, 1 if v1 < v2 else 0)
+    vm.put(a3, 1 if v1 < v2 else 0)
 
 def eq(vm, a1: Tuple[int, int], a2: Tuple[int, int], a3: Tuple[int, int]):
     v1 = vm.get(*a1)
     v2 = vm.get(*a2)
     if vm.debug:
         print("{} == {} ?".format(v1,v2))
-    vm.memory.write(a3, 1 if v1 == v2 else 0)
+    vm.put(a3, 1 if v1 == v2 else 0)
+
+def arb(vm, a1: Tuple[int, int]):
+    v1 = vm.get(*a1)
+    vm.relative_base += v1
 
 def hlt(vm):
     vm.halt()

@@ -4,8 +4,8 @@ from typing import List, Tuple, Union
 import traceback
 
 class VM:
-    def __init__(self):
-        self.reset()
+    def __init__(self, memory_size = None):
+        self.reset(memory_size)
 
     def setDebug(self, enable):
         self.debug = enable
@@ -13,8 +13,8 @@ class VM:
     def setPrintAsm(self, enable):
         self.print_asm = enable
     
-    def reset(self):
-        self.memory = Memory()
+    def reset(self, memory_size = None):
+        self.memory = Memory(memory_size)
         self.halted = False
         self.ip = 0
         self.sp = 0
@@ -25,6 +25,7 @@ class VM:
         self.waiting_for_input = False
         self.queue_outputs = False
         self.queued_outputs = list()
+        self.relative_base = 0
     
     def load(self, instructions: str):
         instrlist = list(map(int, instructions.split(",")))
@@ -60,6 +61,7 @@ class VM:
             6: { 'fn': ops.jz, 'name': 'JZ' },
             7: { 'fn': ops.lt, 'name': 'LT' },
             8: { 'fn': ops.eq, 'name': 'EQ' },
+            9: { 'fn': ops.arb, 'name': 'ARB' },
             99: { 'fn': ops.hlt, 'name': 'HLT' },
         }
 
@@ -91,7 +93,7 @@ class VM:
         self.halted = True
 
     def parse(self, instruction: int) -> (List[int], int, int):
-        argcs = { 1: 3, 2: 3, 3: 1, 4: 1, 5: 2, 6: 2, 7: 3, 8: 3, 99: 0 }
+        argcs = { 1: 3, 2: 3, 3: 1, 4: 1, 5: 2, 6: 2, 7: 3, 8: 3, 9: 1, 99: 0 }
 
         opcode = instruction % 100
         pmodes = list()
@@ -114,8 +116,28 @@ class VM:
             return self.memory.read(value)
         elif pmode == 1:
             return value
+        elif pmode == 2:
+            return self.memory.read(self.relative_base + value)
         else:
             print("Unknown pmode: %d" % pmode)
+            exit(1)
+
+    def put(self, *args):
+        if len(args) == 2 and isinstance(args[0], tuple):
+            pmode, loc = args[0]
+            value = args[1]
+        elif len(args) == 3:
+            pmode, loc, value = args
+        else:
+            print("ERROR: bad arg count to vm.put: {}".format(args))
+            exit(1)
+
+        if pmode == 0:
+            self.memory.write(loc, value)
+        elif pmode == 2:
+            self.memory.write(self.relative_base + loc, value)
+        else:
+            print("ERROR: cannot write to immediate value {}".format(loc))
             exit(1)
 
     def queue_input(self, input):
