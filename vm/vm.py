@@ -20,9 +20,11 @@ class VM:
         self.sp = 0
         self.debug = False
         self.print_asm = False
+        self.input_function = None
         self.queue_inputs = False
         self.queued_inputs = list()
         self.waiting_for_input = False
+        self.output_function = None
         self.queue_outputs = False
         self.queued_outputs = list()
         self.relative_base = 0

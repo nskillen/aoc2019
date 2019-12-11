@@ -15,14 +15,16 @@ def mul(vm, a1: Tuple[int, int], a2: Tuple[int, int], a3: Tuple[int, int]):
     vm.put(a3, v1 * v2)
 
 def inp(vm, a1: Tuple[int, int]):
-    if not vm.queue_inputs:
-        val = int(input("> "))
-    else:
+    if vm.input_function is not None:
+        val = vm.input_function()
+    elif vm.queue_inputs:
         if len(vm.queued_inputs) == 0:
             vm.waiting_for_input = True
             return
         val = vm.queued_inputs[0]
         vm.queued_inputs = vm.queued_inputs[1:]
+    else:
+        val = int(input("> "))
 
     if vm.debug:
         print("[{}] = {}".format(a1, val))
@@ -30,7 +32,9 @@ def inp(vm, a1: Tuple[int, int]):
 
 def out(vm, a1: Tuple[int, int]):
     v1 = vm.get(a1)
-    if vm.queue_outputs:
+    if vm.output_function is not None:
+        vm.output_function(v1)
+    elif vm.queue_outputs:
         vm.queued_outputs.append(v1)
     else:
         print(v1)
