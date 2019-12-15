@@ -24,7 +24,10 @@ def inp(vm, a1: Tuple[int, int]):
         val = vm.queued_inputs[0]
         vm.queued_inputs = vm.queued_inputs[1:]
     else:
-        val = int(input("> "))
+        val = input("> ")
+        if val == "QUIT":
+            exit(0)
+        val = int(val)
 
     if vm.debug:
         print("[{}] = {}".format(a1, val))

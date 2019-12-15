@@ -3,6 +3,16 @@ from . import ops
 from typing import List, Tuple, Union
 import traceback
 
+input_queue = list()
+output_queue = list()
+
+def manualInput(vm):
+    pass
+
+def queueInput(vm, value):
+    input_queue.append
+
+
 class VM:
     def __init__(self, memory_size = None):
         self.reset(memory_size)
@@ -21,6 +31,7 @@ class VM:
         self.debug = False
         self.print_asm = False
         self.input_function = None
+        self.output_function = None
         self.queue_inputs = False
         self.queued_inputs = list()
         self.waiting_for_input = False
